@@ -11,7 +11,8 @@ console.log('TEST');
 window.addEventListener('load', onVrViewLoad);
 function onVrViewLoad() {
   var vrView = new VRView.Player('#vrview', {
-     image: 'http://i.imgur.com/KyECLqf.jpg',
+     window.location.search.substr(1).split('=')[1],
+     //image: 'http://i.imgur.com/KyECLqf.jpg',
      is_stereo: false
   });
 }
