@@ -8,6 +8,39 @@
 </iframe>
     <div id="vrview"></div>
 <script>
+(function() {
+var fullscreen = false;
+var eventQueue = [];
+
+function changeHandler() {
+  //console.log('changeHandler');
+  fullscreen = !fullscreen;
+  var fn;
+  while(fn = eventQueue.pop()) { fn(); }
+}
+
+function addStyle() {
+    var iframeDocument = document.querySelector('iframe').contentWindow.document;
+
+    var css = '.webvr-button { top: 0; }';
+    css += '\n.webvr-button { width: 240px !important; height: 240px !important; top: 0; }';
+    css += '\n.webvr-button:last-of-type { right: 240px !important; }';
+    css += '\n.webvr-button.small { width: 24px !important; height: 24px !important; top: 0; }';
+    css += '\n.webvr-button.small:last-of-type { right: 48px !important; }';
+    var head = iframeDocument.head || iframeDocument.getElementsByTagName('head')[0],
+        style = iframeDocument.createElement('style');
+
+    style.type = 'text/css';
+    if (style.styleSheet){
+      style.styleSheet.cssText = css;
+    } else {
+      style.appendChild(iframeDocument.createTextNode(css));
+    }
+
+    head.appendChild(style);
+}
+
+document.addEventListener("webkitfullscreenchange", changeHandler, false);
 window.addEventListener('load', onVrViewLoad);
 function onVrViewLoad() {
   var vrView = new VRView.Player('#vrview', {
@@ -17,12 +50,30 @@ function onVrViewLoad() {
      is_stereo: false
   });
 
-  vrView.on('ready', function(event) {
+  vrView.on('click', function(event) {
+    //console.log('click');
+    var buttons = document.querySelector('iframe').contentWindow.document.querySelectorAll('.webvr-button');
 
-    console.log('test');
-    document.querySelector('iframe').webkitRequestFullscreen();
+    eventQueue.push(function() {
+      if(fullscreen) {
+        //console.log('fullscreen');
+        buttons.forEach(function(button) {
+          button.className += ' small';
+        });
+      } else {
+        //console.log('leaving');
+        buttons.forEach(function(button) {
+          button.className = button.className.replace(/ small/, '');
+        });
+      }
+    });
+  });
+
+  vrView.on('ready', function(event) {
+    addStyle();
   });
 }
+})();
 </script>
   </body>
 </html>
